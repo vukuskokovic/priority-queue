@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PriorityQueue;
 
-public class PriorityQueue<TValue, TPriority> : IEnumerable<TValue>, IEnumerable where TPriority : IComparable
+public class PriorityQueue<TValue, TPriority> : IEnumerable<TValue>, IEnumerable where TPriority : IComparable where TValue : class
 {
     private readonly object _lockObject = new();
     private readonly List<PriorityQueueItem<TValue, TPriority>> _itemList = new();
@@ -14,7 +14,7 @@ public class PriorityQueue<TValue, TPriority> : IEnumerable<TValue>, IEnumerable
 
 
     /// <summary>
-    /// Removes an item from the queue based on its idnex
+    /// Removes an item from the queue based on its index
     /// </summary>
     /// <param name="index">Index to remove </param>
     /// <exception cref="ArgumentOutOfRangeException">If the index is non positive or out of range</exception>
@@ -31,14 +31,18 @@ public class PriorityQueue<TValue, TPriority> : IEnumerable<TValue>, IEnumerable
     /// <returns>Index or <c>-1</c> if not found</returns>
     public int IndexOf(TValue item)
     {
-        int index = 0;
-        foreach (var queueItem in _itemList) {
-            if (queueItem.Equals(item)) return index;
+        lock (_lockObject)
+        {
+            int index = 0;
+            foreach (var queueItem in _itemList)
+            {
+                if (queueItem.Value == item) return index;
 
-            index++;
+                index++;
+            }
+
+            return -1;
         }
-
-        return -1;
     }
 
     /// <summary>
